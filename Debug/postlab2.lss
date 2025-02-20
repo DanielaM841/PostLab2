@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.8  C:\Users\Lenovo\Desktop\Dany\Digital 2\arduino nano\postlab2\postlab2\main.asm Wed Feb 19 22:49:52 2025
+AVRASM ver. 2.2.8  C:\Users\Lenovo\Desktop\Dany\Digital 2\arduino nano\postlab2\postlab2\main.asm Thu Feb 20 00:41:25 2025
 
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m328Pdef.inc'
 C:\Users\Lenovo\Desktop\Dany\Digital 2\arduino nano\postlab2\postlab2\main.asm(7): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc'
@@ -1036,127 +1036,162 @@ C:\Users\Lenovo\Desktop\Dany\Digital 2\arduino nano\postlab2\postlab2\main.asm(7
                                  #endif  /* _M328PDEF_INC_ */
                                  
                                  ; ***** END OF FILE ******************************************************
-                                 .dseg
-                                 .org	SRAM_START
                                  .cseg
                                  .org 0x0000
-                                 
+                                 .def COUNTER = R20
                                  // Configuracion de la pila
 000000 ef0f                      LDI		 R16, LOW(RAMEND)
 000001 bf0d                      OUT		 SPL, R16
 000002 e008                      LDI		 R16, HIGH(RAMEND)
 000003 bf0e                      OUT		 SPH, R16
+000004 c006                      RJMP	SETUP			//Salto al SETUP
+                                 .org PCI2addr
+00000a c03b                          RJMP	PCINT1_ISR      //Vector de interrupción por cambio de pin en PC
+                                 
                                  // Configuracion MCU
                                  SETUP:
+                                 //Variables
+                                 	;R18 es para el valor de la tabla del display (puntero) 
+                                 	;R21 es para el valor del contador para el of y uf del display
+                                 	;R20 es el valor del contador del timer para los ciclos 
+                                 	;R17 valor para comparción del estado del botón 
+                                 	;R19 valor para guardar el contador de 4 bits 
+                                 // Configurar Prescaler 
+00000b e800                      	LDI		R16, (1 << CLKPCE)
+00000c 9300 0061                 	STS		CLKPR, R16 // Habilitar cambio de PRESCALER
+00000e e004                      	LDI		R16, 0b00000100
+00000f 9300 0061                 	STS		CLKPR, R16 // Configurar Prescaler en 1MHz
+                                 	// Inicializar timer0
+000011 940e 006a                     CALL    INIT_TMR0
+                                 	// Puerto el bit 5 del puerto B como salidas
+                                 	// Configurar PB5 como salida para usarlo como "LED"
+000013 ef0f                      	LDI		R16, 0xFF
+000014 b904                      	OUT		DDRB, R16 // Puerto B como salida
+000015 e000                      	LDI		R16, 0x00
+000016 b905                      	OUT		PORTB, R16 //El puerto B conduce cero logico.
+                                 	// Deshabilitar serial 
                                  	//Configurar los pines 
-                                 
                                  	 //Puerto C como entrada
-000004 e000                      	LDI		R16, 0x00
-000005 b907                      	OUT		DDRC, R16
-000006 ef0f                      	LDI		R16, 0xFF
-000007 b908                      	OUT		PORTC, R16		//Pull-up
+000017 e000                      	LDI		R16, 0x00
+000018 b907                      	OUT		DDRC, R16
+000019 ef0f                      	LDI		R16, 0xFF
+00001a b908                      	OUT		PORTC, R16		//Pull-up
                                  
                                  	//Puerto B como salida
-000008 ef0f                      	LDI		R16, 0xFF
-000009 b904                      	OUT		DDRB, R16		// Puerto B como salida
-00000a e000                      	LDI		R16, 0x00
-00000b b905                      	OUT		PORTB, R16		//El puerto B conduce cero logico.
+00001b ef0f                      	LDI		R16, 0xFF
+00001c b904                      	OUT		DDRB, R16		// Puerto B como salida
+00001d e000                      	LDI		R16, 0x00
+00001e b905                      	OUT		PORTB, R16		//El puerto B conduce cero logico.
                                  
                                  	//Puerto D como salida
-00000c ef0f                      	LDI R16, 0xFF
-00000d b90a                      	OUT DDRD, R16  ; Configura PORTD como salida
-00000e e000                      	LDI R16, 0x00
-00000f b90b                      	OUT PORTD, R16  ; Inicializa en 0		
+00001f ef0f                      	LDI R16, 0xFF
+000020 b90a                      	OUT DDRD, R16  ; Configura PORTD como salida
+000021 e000                      	LDI R16, 0x00
+000022 b90b                      	OUT PORTD, R16  ; Inicializa en 0		
                                  	// Deshabilitar serial 
-000010 e000                      	LDI		R16, 0x00
-000011 9300 00c1                 	STS		UCSR0B, R16
-000013 e71f                      	LDI		R17, 0x7F //Estado de los botones
+000023 e000                      	LDI		R16, 0x00
+000024 9300 00c1                 	STS		UCSR0B, R16
+000026 e71f                      	LDI		R17, 0x7F //Estado de los botones
                                  
                                  	//Salidas
-000014 e020                      	LDI		R18, 0x00		//Contador de 4 bit
-000015 e050                      	LDI		R21, 0x00 //contador of y uf 
+000027 e020                      	LDI		R18, 0x00		//Contador de 4 bit
+000028 e050                      	LDI		R21, 0x00 //contador of y uf 
                                  	
                                  	//Cargar la tabla como salida
-000016 e0f0                      	LDI		ZH, HIGH(TABLA<<1)  //Carga la parte alta de la dirección de tabla en el registro ZH
-000017 eae4                      	LDI		ZL, LOW(TABLA<<1)	//Carga la parte baja de la dirección de la tabla en el registro ZL
-000018 9124                      	LPM		R18, Z			    //Carga en R16 el valor de la tabla en ela dirreción Z
-000019 b92b                      	OUT		PORTD, R18		   //Muestra en el puerto D el valor leido de la tabla
+000029 e0f0                      	LDI		ZH, HIGH(TABLA<<1)  //Carga la parte alta de la dirección de tabla en el registro ZH
+00002a edee                      	LDI		ZL, LOW(TABLA<<1)	//Carga la parte baja de la dirección de la tabla en el registro ZL
+00002b 9124                      	LPM		R18, Z			    //Carga en R16 el valor de la tabla en ela dirreción Z
+00002c b92b                      	OUT		PORTD, R18		   //Muestra en el puerto D el valor leido de la tabla
+                                 
+                                 	//Habilitar las interrupciones para el antirebote. 
+00002d e002                      	LDI		R16,	0x02			
+00002e 9300 0068                 	STS		PCICR,	R16				//pin change en el pin C
+000030 e00c                      	LDI		R16,	(1<<PCINT10) | (1<<PCINT11)	//Habilitar pin 0 y pin 1
+000031 9300 006c                 	STS		PCMSK1,	R16				//	Cargar a PCMSK1
+                                 
+000033 9478                      	SEI 
+                                 
                                  // Loop Infinito
                                  MAIN:
-00001a b106                      	IN		R16, PINC // Guardando el estado de PORTC en R16 0xFF
-00001b 1710                      	CP		R17, R16 // Comparamos estado "viejo" con estado "nuevo"
-00001c f3e9                      	BREQ	MAIN
-00001d 940e 0045                 	CALL	DELAY
-00001f b106                      	IN		R16, PINC
-000020 1710                      	CP		R17, R16
-000021 f3c1                      	BREQ	MAIN
-                                 	// Volver a leer PIND
-000022 2f10                      	MOV		R17, R16 //copia el estado actual del pin en R17
-000023 ff02                      	SBRS	R16, 2 // Salta si el bit 2 del PIND es 1 (no apachado)
-000024 940e 002b                 	CALL	SUMA //si el botón esta presionado suma
-000026 ff03                      	SBRS	R16, 3 //Si el bit 3 de PIND es 1 (botón NO presionado), salta la siguiente instrucción
-000027 940e 0031                 	CALL	RESTA // Si el boton 2 está presionado, llama a RESTA
-000029 b92b                      	OUT		PORTD, R18
-00002a cfef                      	RJMP	MAIN
-                                 SUMA: 
-00002b 9553                      	INC		R21
-00002c 3150                      	CPI		R21, 0x10
-00002d f051                      	BREQ	OF1
-00002e 9631                      	ADIW	Z,1
-00002f 9124                      	LPM		R18,Z 
-000030 9508                      	RET
-                                 RESTA: 
-000031 3050                      	CPI		R21, 0x00
-000032 f059                      	BREQ	UF2 // si es 0 ir a under flow 
-000033 952a                      	DEC		R18
-000034 955a                      	DEC		R21
-000035 9731                      	SBIW	Z,1
-000036 9124                      	LPM		R18,Z 
-000037 9508                      	RET
-                                 OF1:
-000038 e0f0                      	LDI		ZH, HIGH(TABLA<<1)  //Posicionarse nuevamente en la primera posición  
-000039 eae4                      	LDI		ZL, LOW(TABLA<<1)	
                                  	
-00003a 9124                      	LPM		R18, Z			   
-00003b b92b                      	OUT		PORTD, R18		   
-00003c e050                      	LDI		R21,	0x00
-00003d 9508                      	RET
+                                 	//Timer para leds cambien 
+000034 b305                      	IN		R16, TIFR0 // Leer registro de interrupcion 
+000035 ff00                      	SBRS	R16, TOV0 // Salta si el bit 0 esta en 1, es la bandera de of
+000036 cffd                      	RJMP	MAIN // Reiniciar loop si no hay of
+000037 9aa8                      	SBI		TIFR0, TOV0 // Limpiar bandera de "overflow"
+000038 e604                      	LDI		R16, 100
+000039 bd06                      	OUT		TCNT0, R16 // Volver a cargar valor inicial en TCNT0
+00003a 9543                      	INC		COUNTER
+00003b 3644                      	CPI		COUNTER, 100 // R20 = 10 después 1s (el TCNT0 está en to 10 ms)
+00003c f7b9                      	BRNE	MAIN
+00003d 2744                      	CLR		COUNTER
+00003e 9533                      	INC     R19
+00003f 3130                      	CPI		R19, 0x10 //comparar con 16
+000040 f011                      	BREQ	OF1 //si es 16 ejecutar el break 
+000041 b935                      	OUT		PORTB, R19 //si no es 16 cargar el valor 
+000042 cff1                      	RJMP	MAIN
+                                 OF1:
+000043 e030                      	LDI		R19, 0x00 //si es 16 el valor hay of y se hace 0
+000044 b935                      	OUT		PORTB, R19
+000045 cfee                      	RJMP	MAIN
+                                 
+                                 //Subrutinas para anti rebote 
+                                 PCINT1_ISR:
+000046 7130                      	ANDI	R19, 0x10				//Borrar los 4 bits menos significativos
+000047 b935                      	OUT		PORTB, R19
+000048 b116                      	IN		R17, PINC				//Leer el estado de los botones
+000049 ff12                      	SBRS	R17, 2					//Verificar si el bit 2 esta en 1
+00004a 940e 0051                 	CALL	SUMA				//sumar el display
+00004c ff13                      	SBRS	R17, 3					//Verificar si el bit 2 esta en 1
+00004d 940e 0057                 	CALL	RESTA				//restar el display
+00004f b92b                      	OUT		PORTD, R18		   
+000050 9518                      	RETI
+                                 SUMA: 
+000051 9553                      	INC		R21
+000052 3150                      	CPI		R21, 0x10
+000053 f049                      	BREQ	OF2
+000054 9631                      	ADIW	Z,1
+000055 9124                      	LPM		R18,Z 
+000056 9508                      	RET
+                                 RESTA: 
+000057 3050                      	CPI		R21, 0x00
+000058 f051                      	BREQ	UF2 // si es 0 ir a under flow 
+000059 955a                      	DEC		R21
+00005a 9731                      	SBIW	Z,1
+00005b 9124                      	LPM		R18,Z 
+00005c 9508                      	RET
+                                 OF2:
+00005d e0f0                      	LDI		ZH, HIGH(TABLA<<1)  //Posicionarse nuevamente en la primera posición  
+00005e edee                      	LDI		ZL, LOW(TABLA<<1)	
+                                 	
+00005f 9124                      	LPM		R18, Z			   
+000060 b92b                      	OUT		PORTD, R18		   
+000061 e050                      	LDI		R21,	0x00
+000062 9508                      	RET
                                  
                                  UF2:
-00003e e0f0                      	LDI		ZH, HIGH(TABLA<<1) //Posicionarse en la útima posición 
-00003f eae4                      	LDI		ZL, LOW(TABLA<<1)
-000040 963f                      	ADIW	Z, 15	
-000041 9124                      	LPM		R18, Z			   
-000042 b92b                      	OUT		PORTD, R18		   
-000043 e05f                      	LDI		R21,	0x0F
-000044 9508                      	RET
-                                 // Sub-rutina 
-                                 DELAY:
-000045 ef3f                      	LDI		R19, 0xFF
-                                 SUB_DELAY1:
-000046 953a                      	DEC		R19
-000047 3030                      	CPI		R19, 0
-000048 f7e9                      	BRNE	SUB_DELAY1
-000049 ef3f                      	LDI		R19, 0xFF
-                                 SUB_DELAY2:
-00004a 953a                      	DEC		R19
-00004b 3030                      	CPI		R19, 0
-00004c f7e9                      	BRNE	SUB_DELAY2
-00004d ef3f                      	LDI		R19, 0xFF
-                                 SUB_DELAY3:
-00004e 953a                      	DEC		R19
-00004f 3030                      	CPI		R19, 0
-000050 f7e9                      	BRNE	SUB_DELAY3
-000051 9508                      	RET
-                                 
+000063 e0f0                      	LDI		ZH, HIGH(TABLA<<1) //Posicionarse en la útima posición 
+000064 edee                      	LDI		ZL, LOW(TABLA<<1)
+000065 963f                      	ADIW	Z, 15	
+000066 9124                      	LPM		R18, Z			   
+000067 b92b                      	OUT		PORTD, R18		   
+000068 e05f                      	LDI		R21,	0x0F
+000069 9508                      	RET
+                                 // NON-Interrupt subroutines
+                                 INIT_TMR0:
+00006a e003                      	LDI		R16, (1<<CS01) | (1<<CS00)
+00006b bd05                      	OUT		TCCR0B, R16 // Setear prescaler del TIMER 0 a 64
+00006c e604                      	LDI		R16, 100
+00006d bd06                      	OUT		TCNT0, R16 // Cargar valor inicial en TCNT0
+00006e 9508                      	RET
                                  //Tabla para 7 segmentos 
-000052 0677
-000053 97b3
-000054 d5c6
-000055 07f5
-000056 d7f7
-000057 f4e7
-000058 b671
+00006f 0677
+000070 97b3
+000071 d5c6
+000072 07f5
+000073 d7f7
+000074 f4e7
+000075 b671
 
 
 RESOURCE USE INFORMATION
@@ -1176,37 +1211,37 @@ counted separately from r26..r31 here.
 "ATmega328P" register use summary:
 x  :   0 y  :   0 z  :   8 r0 :   0 r1 :   0 r2 :   0 r3 :   0 r4 :   0 
 r5 :   0 r6 :   0 r7 :   0 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 
-r13:   0 r14:   0 r15:   0 r16:  25 r17:   4 r18:  11 r19:   9 r20:   0 
+r13:   0 r14:   0 r15:   0 r16:  38 r17:   4 r18:  10 r19:   7 r20:   3 
 r21:   7 r22:   0 r23:   0 r24:   0 r25:   0 r26:   0 r27:   0 r28:   0 
 r29:   0 r30:   3 r31:   3 
-Registers used: 8 out of 35 (22.9%)
+Registers used: 9 out of 35 (25.7%)
 
 "ATmega328P" instruction use summary:
 .lds  :   0 .sts  :   0 adc   :   0 add   :   0 adiw  :   2 and   :   0 
-andi  :   0 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
-brcc  :   0 brcs  :   0 break :   0 breq  :   4 brge  :   0 brhc  :   0 
+andi  :   1 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
+brcc  :   0 brcs  :   0 break :   0 breq  :   3 brge  :   0 brhc  :   0 
 brhs  :   0 brid  :   0 brie  :   0 brlo  :   0 brlt  :   0 brmi  :   0 
-brne  :   3 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0 
+brne  :   1 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0 
 brvs  :   0 bset  :   0 bst   :   0 call  :   3 cbi   :   0 cbr   :   0 
-clc   :   0 clh   :   0 cli   :   0 cln   :   0 clr   :   0 cls   :   0 
-clt   :   0 clv   :   0 clz   :   0 com   :   0 cp    :   2 cpc   :   0 
-cpi   :   5 cpse  :   0 dec   :   5 eor   :   0 fmul  :   0 fmuls :   0 
-fmulsu:   0 icall :   0 ijmp  :   0 in    :   2 inc   :   1 jmp   :   0 
-ld    :   0 ldd   :   0 ldi   :  23 lds   :   0 lpm   :  10 lsl   :   0 
-lsr   :   0 mov   :   1 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
-neg   :   0 nop   :   0 or    :   0 ori   :   0 out   :  12 pop   :   0 
-push  :   0 rcall :   0 ret   :   5 reti  :   0 rjmp  :   1 rol   :   0 
-ror   :   0 sbc   :   0 sbci  :   0 sbi   :   0 sbic  :   0 sbis  :   0 
-sbiw  :   1 sbr   :   0 sbrc  :   0 sbrs  :   2 sec   :   0 seh   :   0 
-sei   :   0 sen   :   0 ser   :   0 ses   :   0 set   :   0 sev   :   0 
-sez   :   0 sleep :   0 spm   :   0 st    :   0 std   :   0 sts   :   1 
+clc   :   0 clh   :   0 cli   :   0 cln   :   0 clr   :   1 cls   :   0 
+clt   :   0 clv   :   0 clz   :   0 com   :   0 cp    :   0 cpc   :   0 
+cpi   :   4 cpse  :   0 dec   :   1 eor   :   0 fmul  :   0 fmuls :   0 
+fmulsu:   0 icall :   0 ijmp  :   0 in    :   2 inc   :   3 jmp   :   0 
+ld    :   0 ldd   :   0 ldi   :  30 lds   :   0 lpm   :  10 lsl   :   0 
+lsr   :   0 mov   :   0 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
+neg   :   0 nop   :   0 or    :   0 ori   :   0 out   :  20 pop   :   0 
+push  :   0 rcall :   0 ret   :   5 reti  :   1 rjmp  :   5 rol   :   0 
+ror   :   0 sbc   :   0 sbci  :   0 sbi   :   1 sbic  :   0 sbis  :   0 
+sbiw  :   1 sbr   :   0 sbrc  :   0 sbrs  :   3 sec   :   0 seh   :   0 
+sei   :   1 sen   :   0 ser   :   0 ses   :   0 set   :   0 sev   :   0 
+sez   :   0 sleep :   0 spm   :   0 st    :   0 std   :   0 sts   :   5 
 sub   :   0 subi  :   0 swap  :   0 tst   :   0 wdr   :   0 
-Instructions used: 18 out of 113 (15.9%)
+Instructions used: 21 out of 113 (18.6%)
 
 "ATmega328P" memory use summary [bytes]:
 Segment   Begin    End      Code   Data   Used    Size   Use%
 ---------------------------------------------------------------
-[.cseg] 0x000000 0x0000b4    164     16    180   32768   0.5%
+[.cseg] 0x000000 0x0000ee    212     16    228   32768   0.7%
 [.dseg] 0x000100 0x000100      0      0      0    2048   0.0%
 [.eseg] 0x000000 0x000000      0      0      0    1024   0.0%
 

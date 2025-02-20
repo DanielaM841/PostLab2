@@ -23,16 +23,15 @@
   <FILE>postlab2.lss</FILE>
  </OUTPUT_FILES>
  <LABELS>
-  <SETUP><FILE>C:\Users\Lenovo\Desktop\Dany\Digital 2\arduino nano\postlab2\postlab2\main.asm</FILE><LINE>19</LINE></SETUP>
-  <TABLA><FILE>C:\Users\Lenovo\Desktop\Dany\Digital 2\arduino nano\postlab2\postlab2\main.asm</FILE><LINE>122</LINE></TABLA>
-  <MAIN><FILE>C:\Users\Lenovo\Desktop\Dany\Digital 2\arduino nano\postlab2\postlab2\main.asm</FILE><LINE>54</LINE></MAIN>
-  <DELAY><FILE>C:\Users\Lenovo\Desktop\Dany\Digital 2\arduino nano\postlab2\postlab2\main.asm</FILE><LINE>103</LINE></DELAY>
-  <SUMA><FILE>C:\Users\Lenovo\Desktop\Dany\Digital 2\arduino nano\postlab2\postlab2\main.asm</FILE><LINE>70</LINE></SUMA>
-  <RESTA><FILE>C:\Users\Lenovo\Desktop\Dany\Digital 2\arduino nano\postlab2\postlab2\main.asm</FILE><LINE>77</LINE></RESTA>
-  <OF1><FILE>C:\Users\Lenovo\Desktop\Dany\Digital 2\arduino nano\postlab2\postlab2\main.asm</FILE><LINE>85</LINE></OF1>
-  <UF2><FILE>C:\Users\Lenovo\Desktop\Dany\Digital 2\arduino nano\postlab2\postlab2\main.asm</FILE><LINE>94</LINE></UF2>
-  <SUB_DELAY1><FILE>C:\Users\Lenovo\Desktop\Dany\Digital 2\arduino nano\postlab2\postlab2\main.asm</FILE><LINE>105</LINE></SUB_DELAY1>
-  <SUB_DELAY2><FILE>C:\Users\Lenovo\Desktop\Dany\Digital 2\arduino nano\postlab2\postlab2\main.asm</FILE><LINE>110</LINE></SUB_DELAY2>
-  <SUB_DELAY3><FILE>C:\Users\Lenovo\Desktop\Dany\Digital 2\arduino nano\postlab2\postlab2\main.asm</FILE><LINE>115</LINE></SUB_DELAY3>
+  <SETUP><FILE>C:\Users\Lenovo\Desktop\Dany\Digital 2\arduino nano\postlab2\postlab2\main.asm</FILE><LINE>21</LINE></SETUP>
+  <PCINT1_ISR><FILE>C:\Users\Lenovo\Desktop\Dany\Digital 2\arduino nano\postlab2\postlab2\main.asm</FILE><LINE>108</LINE></PCINT1_ISR>
+  <INIT_TMR0><FILE>C:\Users\Lenovo\Desktop\Dany\Digital 2\arduino nano\postlab2\postlab2\main.asm</FILE><LINE>150</LINE></INIT_TMR0>
+  <TABLA><FILE>C:\Users\Lenovo\Desktop\Dany\Digital 2\arduino nano\postlab2\postlab2\main.asm</FILE><LINE>157</LINE></TABLA>
+  <MAIN><FILE>C:\Users\Lenovo\Desktop\Dany\Digital 2\arduino nano\postlab2\postlab2\main.asm</FILE><LINE>84</LINE></MAIN>
+  <OF1><FILE>C:\Users\Lenovo\Desktop\Dany\Digital 2\arduino nano\postlab2\postlab2\main.asm</FILE><LINE>102</LINE></OF1>
+  <SUMA><FILE>C:\Users\Lenovo\Desktop\Dany\Digital 2\arduino nano\postlab2\postlab2\main.asm</FILE><LINE>118</LINE></SUMA>
+  <RESTA><FILE>C:\Users\Lenovo\Desktop\Dany\Digital 2\arduino nano\postlab2\postlab2\main.asm</FILE><LINE>125</LINE></RESTA>
+  <OF2><FILE>C:\Users\Lenovo\Desktop\Dany\Digital 2\arduino nano\postlab2\postlab2\main.asm</FILE><LINE>132</LINE></OF2>
+  <UF2><FILE>C:\Users\Lenovo\Desktop\Dany\Digital 2\arduino nano\postlab2\postlab2\main.asm</FILE><LINE>141</LINE></UF2>
  </LABELS>
 </ASSEMBLER_INFO>
