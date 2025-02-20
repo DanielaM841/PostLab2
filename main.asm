@@ -94,24 +94,32 @@ MAIN:
 	CPI		COUNTER, 100 // R20 = 10 después 1s (el TCNT0 está en to 10 ms)
 	BRNE	MAIN
 	CLR		COUNTER
-	CPI		R19, R21
-	INC     R19
-	CPI		R19, 0x10 //comparar con 16
+	CP		R19, R21
 	BREQ	OF1 //Si el valor es igual al contador del display reiniciar 
 	INC		R19 //si no es igual seguir contando 
 	OUT		PORTB, R19 //si no es 16 cargar el valor 
 	RJMP	MAIN
 OF1:
-	ANDI	R19, 0b10000 //Dejar solo el bit 4 y borrar lo demás 
+	ANDI	R19, 0b00010000 //Dejar solo el bit 4 y borrar lo demás 
 	SBRS	R19, 4 //si el bit 4 esta encendido saltar, no hay necesidad de encender  
 	RJMP	ASET
 	SBRC	R19, 4	//Salta si el 4 bit está apagado, al saltar y hacer de nuevo va a encender
 	RJMP	AOFF		
 	RJMP	MAIN
 ASET:
-	LDI		R19, 0b10000 //Encender el bit 4 del port B
-	ADD		
-
+	LDI		R19, 0b00010000 //Encender el bit 4 del port B
+	ADD		R21, R19	//sumar el valor de el display con el valor de la alarma
+	OUT		PORTB, R19	
+	LDI		R23, 0x10 //Esto es para establecer los límites del of y uf
+	LDI		R24, 0x1F //Los valores cambian dependiendo si se enciende o apaga la alarma 		
+	RJMP	MAIN	
+AOFF:
+	LDI		R19, 0x00 //Apagar la alarma 
+	OUT		PORTB, R19	
+	ANDI	R21, 0b00001111 //Con esto establecemos el bit 4 del contador del display en 0
+	LDI		R23, 0x00 //Esto es para establecer los límites del of y uf
+	LDI		R24, 0x0F //Los valores cambian dependiendo si se enciende o apaga la alarma 		
+	RJMP	MAIN	
 
 //Subrutinas para anti rebote 
 PCINT1_ISR:
@@ -125,14 +133,14 @@ PCINT1_ISR:
 	OUT		PORTD, R18		   
 	RETI
 SUMA: 
-	INC		R21
-	CPI		R21, 0x10
+	CP		R21, R24 //comparar con el límite de of
 	BREQ	OF2
+	INC		R21
 	ADIW	Z,1
 	LPM		R18,Z 
 	RET
 RESTA: 
-	CPI		R21, 0x00
+	CP		R21, R23 //comparar con el límite de uf
 	BREQ	UF2 // si es 0 ir a under flow 
 	DEC		R21
 	SBIW	Z,1
@@ -144,7 +152,7 @@ OF2:
 	
 	LPM		R18, Z			   
 	OUT		PORTD, R18		   
-	LDI		R21,	0x00
+	MOV		R21, R23
 	RET
 
 UF2:
@@ -153,7 +161,7 @@ UF2:
 	ADIW	Z, 15	
 	LPM		R18, Z			   
 	OUT		PORTD, R18		   
-	LDI		R21,	0x0F
+	MOV		R21, R24
 	RET
 // NON-Interrupt subroutines
 INIT_TMR0:
