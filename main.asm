@@ -75,8 +75,8 @@ SETUP:
 	//Habilitar las interrupciones para el antirebote. 
 	LDI		R16,	0x02			
 	STS		PCICR,	R16				//pin change en el pin C
-	LDI		R16,	(1<<PCINT10) | (1<<PCINT11)	//Habilitar pin 0 y pin 1
-	STS		PCMSK1,	R16				//	Cargar a PCMSK1
+	LDI		R16,	(1<<PCINT10) | (1<<PCINT11)	//Habilitar pin 2 y pin 3
+	STS		PCMSK1,	R16				
 
 	SEI 
 
