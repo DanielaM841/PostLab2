@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.8  C:\Users\Lenovo\Desktop\Dany\Digital 2\arduino nano\postlab2\postlab2\main.asm Thu Feb 20 02:27:02 2025
+AVRASM ver. 2.2.8  C:\Users\Lenovo\Desktop\Dany\Digital 2\arduino nano\postlab2\postlab2\main.asm Fri Feb 21 01:25:46 2025
 
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m328Pdef.inc'
 C:\Users\Lenovo\Desktop\Dany\Digital 2\arduino nano\postlab2\postlab2\main.asm(7): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc'
@@ -1106,8 +1106,8 @@ C:\Users\Lenovo\Desktop\Dany\Digital 2\arduino nano\postlab2\postlab2\main.asm(7
                                  	//Habilitar las interrupciones para el antirebote. 
 00002d e002                      	LDI		R16,	0x02			
 00002e 9300 0068                 	STS		PCICR,	R16				//pin change en el pin C
-000030 e00c                      	LDI		R16,	(1<<PCINT10) | (1<<PCINT11)	//Habilitar pin 0 y pin 1
-000031 9300 006c                 	STS		PCMSK1,	R16				//	Cargar a PCMSK1
+000030 e00c                      	LDI		R16,	(1<<PCINT10) | (1<<PCINT11)	//Habilitar pin 2 y pin 3
+000031 9300 006c                 	STS		PCMSK1,	R16				
                                  
 000033 9478                      	SEI 
                                  
